@@ -493,19 +493,7 @@ Use Pomodoro cycle: 45-5
 
 <h2>Productivity Heatmap</h2>
 
-<div class="heatmap">
-
-<div class="heat high">6 AM</div>
-
-<div class="heat high">8 AM</div>
-
-<div class="heat high">10 AM</div>
-
-<div class="heat medium">1 PM</div>
-
-<div class="heat medium">4 PM</div>
-
-<div class="heat low">11 PM</div>
+<div class="heatmap" id="heatmap">
 
 </div>
 
@@ -515,9 +503,12 @@ Use Pomodoro cycle: 45-5
 
 <script>
 
+let focusChart = null;
+let appChart = null;
+
 async function uploadCSV(){
 
-const fileInput=
+const fileInput =
 document.getElementById('fileInput');
 
 if(!fileInput.files.length){
@@ -527,7 +518,7 @@ alert("Please select CSV");
 return;
 }
 
-const formData=new FormData();
+const formData = new FormData();
 
 formData.append(
 'file',
@@ -536,7 +527,7 @@ fileInput.files[0]
 
 try{
 
-const response=await fetch(
+const response = await fetch(
 'https://ai-cognitive-drift-dashboard.onrender.com/upload',
 {
 method:'POST',
@@ -544,11 +535,11 @@ body:formData
 }
 );
 
-const data=await response.json();
+const data = await response.json();
 
 document.getElementById(
 'uploadStatus'
-).innerText=
+).innerText =
 "CSV uploaded successfully";
 
 document.getElementById(
@@ -563,41 +554,103 @@ document.getElementById(
 'heatmapSection'
 ).style.display='block';
 
+// Metrics
+
 document.getElementById(
 'focusScore'
-).innerText=
-data.focus_score+'%';
+).innerText =
+data.focus_score + '%';
 
 document.getElementById(
 'focusTime'
-).innerText=
-data.average_focus_duration+' min';
+).innerText =
+data.average_focus_duration + ' min';
 
 document.getElementById(
 'distractionRate'
-).innerText=
-data.distraction_rate+'%';
+).innerText =
+data.distraction_rate + '%';
 
 document.getElementById(
 'switches'
-).innerText=
+).innerText =
 data.average_switches;
 
 document.getElementById(
 'riskLevel'
-).innerText=
-data.distraction_rate>50
+).innerText =
+data.distraction_rate > 50
 ? "High"
 : "Moderate";
 
 document.getElementById(
 'prediction'
-).innerText=
+).innerText =
 "High distraction probability in next 8 minutes";
+// Dynamic Heatmap
 
-// Focus Chart
+const heatmap =
+document.getElementById('heatmap');
 
-new Chart(
+heatmap.innerHTML = '';
+
+let focusScore =
+parseFloat(data.focus_score);
+
+const hours = [
+'6 AM',
+'8 AM',
+'10 AM',
+'1 PM',
+'4 PM',
+'11 PM'
+];
+
+hours.forEach((hour,index)=>{
+
+const box =
+document.createElement('div');
+
+box.classList.add('heat');
+
+if(focusScore >= 75){
+
+box.classList.add('high');
+
+}
+
+else if(focusScore >= 50){
+
+box.classList.add('medium');
+
+}
+
+else{
+
+box.classList.add('low');
+}
+
+box.innerText = hour;
+
+heatmap.appendChild(box);
+
+// Change score slightly
+focusScore -= 5;
+});
+
+// Destroy previous charts
+
+if(focusChart){
+focusChart.destroy();
+}
+
+if(appChart){
+appChart.destroy();
+}
+
+// Create Focus Chart
+
+focusChart = new Chart(
 document.getElementById('focusChart'),
 {
 
@@ -619,7 +672,15 @@ datasets:[{
 
 label:'Focus Time',
 
-data:[40,42,38,50,45,47,41],
+data:[
+40,
+42,
+38,
+50,
+45,
+47,
+41
+],
 
 borderWidth:3,
 
@@ -628,9 +689,9 @@ tension:0.4
 }
 });
 
-// App Chart
+// Create App Chart
 
-new Chart(
+appChart = new Chart(
 document.getElementById('appChart'),
 {
 
@@ -647,7 +708,12 @@ labels:[
 
 datasets:[{
 
-data:[40,30,20,10]
+data:[
+40,
+30,
+20,
+10
+]
 }]
 }
 });
@@ -658,8 +724,8 @@ catch(error){
 
 document.getElementById(
 'uploadStatus'
-).innerText=
-"Upload failed" + error;
+).innerText =
+"Upload failed: " + error;
 
 console.log(error);
 }

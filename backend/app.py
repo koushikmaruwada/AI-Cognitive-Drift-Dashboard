@@ -6,7 +6,6 @@ from routes.mobile_data import mobile_bp
 from routes.analytics import analytics_bp
 from routes.upload import upload_bp
 
-from twilio.rest import Client
 
 app = Flask(__name__)
 
@@ -35,7 +34,7 @@ def send_parent_alert(message):
 
         body=message,
 
-        from_="+99550685918",
+        from_="+919550685918",
 
         to="+919550685918"
     )

@@ -11,33 +11,7 @@ app = Flask(__name__)
 
 CORS(app)
 
-# =========================
-# Twilio Setup
-# =========================
 
-account_sid = os.environ.get(
-    "TWILIO_ACCOUNT_SID"
-)
-
-auth_token = os.environ.get(
-    "TWILIO_AUTH_TOKEN"
-)
-
-client = Client(
-    account_sid,
-    auth_token
-)
-
-def send_parent_alert(message):
-
-    client.messages.create(
-
-        body=message,
-
-        from_="+919550685918",
-
-        to="+919550685918"
-    )
 
 # =========================
 # Blueprints
@@ -65,16 +39,6 @@ def home():
 
     return "AI Cognitive Drift Backend Running"
 
-@app.route('/test-alert')
-
-def test_alert():
-
-    send_parent_alert(
-
-        "Student distracted during Zoom class"
-    )
-
-    return "Alert Sent Successfully"
 
 # =========================
 # Run App
